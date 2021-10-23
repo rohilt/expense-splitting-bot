@@ -1,0 +1,10 @@
+{
+  "name": "expense-splitting-bot",
+  "main": "index.js",
+  "repository": "https://github.com/rohilt/expense-splitting-bot.git",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^13.2.0",
+    "dotenv": "^10.0.0"
+  }
+}
