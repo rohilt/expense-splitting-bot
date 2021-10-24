@@ -149,8 +149,10 @@ module.exports = {
           inline: true,
         },
       ] : null,
+      thumbnail: {
+        url: 'https://i.ibb.co/pwCNnfB/money-transfer-icon-40389-1.png',
+      },
       footer: {
-        icon_url: 'https://i.ibb.co/pwCNnfB/money-transfer-icon-40389-1.png',
         text: 'React with :thumbsup: to be part of the Trip',
       },
     };
