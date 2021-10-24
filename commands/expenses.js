@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 const {SlashCommandBuilder, userMention} = require('@discordjs/builders');
-const {MessageEmbed} = require('discord.js');
+const {MessageEmbed, Message} = require('discord.js');
 const Event = require('../event');
 
 module.exports = {
@@ -84,9 +84,10 @@ module.exports = {
         content: `Starting the event ${eventName} now! React to this message if you are part of this event.`,
         embeds: [startEmbed],
       });
-      const msgId = (await interaction.fetchReply()).id;
+      const msg = await interaction.fetchReply();
+      await msg.pin();
       // console.log(msgId);
-      return new Event(eventName, msgId);
+      return new Event(eventName, msg);
     } else if (interaction.options.getSubcommand() === 'report') {
       return event;
     } else if (interaction.options.getSubcommand() === 'end') {
