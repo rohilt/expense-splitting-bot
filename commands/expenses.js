@@ -1,3 +1,4 @@
+/* eslint-disable guard-for-in */
 /* eslint-disable max-len */
 const {SlashCommandBuilder, userMention} = require('@discordjs/builders');
 const Event = require('../event');
@@ -42,17 +43,6 @@ module.exports = {
   // - delete [id]
   async execute(interaction, event) {
     if (!interaction.isCommand() || interaction.commandName !== 'expenses') return;
-    const embed = {
-      color: 0xff9a26,
-      description: 'Recorded Expenses for Trip',
-      thumbnail: {
-        url: 'https://i.ibb.co/pwCNnfB/money-transfer-icon-40389-1.png',
-      },
-      timestamp: new Date(),
-      footer: {
-        text: 'React with :thumbsup: to be part of the Trip',
-      },
-    };
     if (interaction.options.getSubcommand() === 'status') {
       if (event) {
         await interaction.reply({
@@ -75,20 +65,34 @@ module.exports = {
         return event;
       }
       const eventName = interaction.options.getString('event');
+      event = new Event(eventName, null);
       await interaction.reply({
         content: `New Trip Created : ${eventName}\n*React to this message if you are part of this event*`,
-        embeds: [{
-          ...embed,
-          title: eventName,
-        }],
+        embeds: [this.getEmbed(event)],
       });
       const msg = await interaction.fetchReply();
       await msg.pin();
+      event.pinnedMsg = msg;
       // console.log(msgId);
-      return new Event(eventName, msg);
+      return event;
     } else if (interaction.options.getSubcommand() === 'report') {
       return event;
     } else if (interaction.options.getSubcommand() === 'end') {
+      event.pinnedMsg = await event.pinnedMsg.edit({embeds: [{
+        ...this.getEmbed(event),
+        description: 'This event is complete',
+      }]});
+      await interaction.reply(`Okay, ending the trip ${event.name} now`);
+      event.pinnedMsg = await event.pinnedMsg.fetch();
+      const reactedUsers = await event.pinnedMsg.reactions.resolve('👍').users.fetch().then((userList) => {
+        return userList;
+      });
+      const allUserIds = Array.from(reactedUsers.keys());
+      const simplifiedTxns = event.getSimplifyingTxns(allUserIds);
+      simplifiedTxns.forEach((txn) => {
+        reactedUsers.get(txn.whoPays).send(`You owe ${userMention(txn.whoOwes)} \$${txn.amount.toFixed(2)}`);
+        reactedUsers.get(txn.whoOwes).send(`You are owed \$${txn.amount.toFixed(2)} from ${userMention(txn.whoPays)}`);
+      });
       return event;
     } else if (interaction.options.getSubcommand() === 'record') {
       if (!event) {
@@ -107,11 +111,12 @@ module.exports = {
       event.addTxn(
           amount,
           description,
-          user,
+          user.id,
       );
       await interaction.reply({
-        content: `Alright, got it. ${userMention(user.id)} paid \$${amount} for ${description}.`,
+        content: `Alright, got it. ${userMention(user.id)} paid \$${amount.toFixed(2)} for ${description}.`,
       });
+      event.pinnedMsg = await event.pinnedMsg.edit({embeds: [this.getEmbed(event)]});
       return event;
     }
 
@@ -120,5 +125,34 @@ module.exports = {
     // eslint-disable-next-line max-len
     // 'Okay, Here are the current transactions I\'ve kept track of for this trip',
     // );
+  },
+  getEmbed(event) {
+    return {
+      color: 0xff9a26,
+      title: event.name,
+      description: 'Recorded Expenses for Trip',
+      timestamp: new Date(),
+      fields: event.txns.length > 0 ? [
+        {
+          name: 'Paid By',
+          value: event.txns.map((txn) => userMention(txn.whoPaid)).join('\n'),
+          inline: true,
+        },
+        {
+          name: 'Description',
+          value: event.txns.map((txn) => txn.description).join('\n'),
+          inline: true,
+        },
+        {
+          name: 'Amount',
+          value: event.txns.map((txn) => `\$${txn.amount.toFixed(2)}`).join('\n'),
+          inline: true,
+        },
+      ] : null,
+      footer: {
+        icon_url: 'https://i.ibb.co/pwCNnfB/money-transfer-icon-40389-1.png',
+        text: 'React with :thumbsup: to be part of the Trip',
+      },
+    };
   },
 };
