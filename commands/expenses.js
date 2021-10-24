@@ -42,22 +42,6 @@ module.exports = {
   // - modify [id] [who] [description] [amount]
   // - delete [id]
   async execute(interaction, event) {
-    const exampleEmbed = new MessageEmbed()
-        .setColor('#0099ff')
-        .setTitle('Some title')
-        .setURL('https://discord.js.org/')
-        .setAuthor('Some name', 'https://i.imgur.com/AfFp7pu.png', 'https://discord.js.org')
-        .setDescription('Some description here')
-        .setThumbnail('https://i.imgur.com/AfFp7pu.png')
-        .addFields(
-            {name: 'Inline title', value: 'Some value \nhere', inline: true},
-            {name: 'Inline title', value: 'Some value \nhere', inline: true},
-            {name: 'Inline title', value: 'Some value \nhere', inline: true},
-        )
-        .setImage('https://i.imgur.com/AfFp7pu.png')
-        .setTimestamp()
-        .setFooter('Some footer text here', 'https://i.imgur.com/AfFp7pu.png');
-
     if (!interaction.isCommand() || interaction.commandName !== 'expenses') return;
     if (interaction.options.getSubcommand() === 'status') {
       if (event) {
@@ -81,9 +65,24 @@ module.exports = {
         return event;
       }
       const eventName = interaction.options.getString('event');
+      const startEmbed = new MessageEmbed()
+          .setColor('#0099ff')
+          .setTitle('Some title')
+          .setURL('https://discord.js.org/')
+          .setAuthor('Some name', 'https://i.imgur.com/AfFp7pu.png', 'https://discord.js.org')
+          .setDescription('Some description here')
+          .setThumbnail('https://i.imgur.com/AfFp7pu.png')
+          .addFields(
+              {name: 'Inline title', value: 'Some value \nhere', inline: true},
+              {name: 'Inline title', value: 'Some value \nhere', inline: true},
+              {name: 'Inline title', value: 'Some value \nhere', inline: true},
+          )
+          .setImage('https://i.imgur.com/AfFp7pu.png')
+          .setTimestamp()
+          .setFooter('Some footer text here', 'https://i.imgur.com/AfFp7pu.png');
       await interaction.reply({
         content: `Starting the event ${eventName} now! React to this message if you are part of this event.`,
-        embeds: [exampleEmbed],
+        embeds: [startEmbed],
       });
       const msgId = (await interaction.fetchReply()).id;
       console.log(msgId);
@@ -93,6 +92,11 @@ module.exports = {
     } else if (interaction.options.getSubcommand() === 'end') {
       return event;
     } else if (interaction.options.getSubcommand() === 'record') {
+      // const newTxn = {
+      //   whoPaid: interaction.options.getUser(user),
+
+      // };
+      // event.txns.push(newTxn);
       return event;
     }
 
