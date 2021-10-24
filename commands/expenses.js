@@ -92,11 +92,11 @@ module.exports = {
     } else if (interaction.options.getSubcommand() === 'end') {
       return event;
     } else if (interaction.options.getSubcommand() === 'record') {
-      // const newTxn = {
-      //   whoPaid: interaction.options.getUser(user),
-
-      // };
-      // event.txns.push(newTxn);
+      event.addTxn(
+          interaction.options.getNumber('amount'),
+          interaction.options.getNumber('description'),
+          interaction.options.getNumber('user'),
+      );
       return event;
     }
 
