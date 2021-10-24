@@ -93,7 +93,7 @@ module.exports = {
         reactedUsers.get(txn.whoPays).send(`You owe ${userMention(txn.whoOwes)} \$${txn.amount.toFixed(2)}`);
         reactedUsers.get(txn.whoOwes).send(`You are owed \$${txn.amount.toFixed(2)} from ${userMention(txn.whoPays)}`);
       });
-      return event;
+      return null;
     } else if (interaction.options.getSubcommand() === 'record') {
       if (!event) {
         await interaction.reply({
