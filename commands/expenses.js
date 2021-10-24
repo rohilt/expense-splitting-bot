@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-const {SlashCommandBuilder} = require('@discordjs/builders');
+const {SlashCommandBuilder, userMention} = require('@discordjs/builders');
 const {MessageEmbed} = require('discord.js');
 const Event = require('../event');
 
@@ -85,18 +85,34 @@ module.exports = {
         embeds: [startEmbed],
       });
       const msgId = (await interaction.fetchReply()).id;
-      console.log(msgId);
+      // console.log(msgId);
       return new Event(eventName, msgId);
     } else if (interaction.options.getSubcommand() === 'report') {
       return event;
     } else if (interaction.options.getSubcommand() === 'end') {
       return event;
     } else if (interaction.options.getSubcommand() === 'record') {
+      if (!event) {
+        await interaction.reply({
+          content: 'It looks like there isn\'t currently an event. Start an event first before recording transactions.',
+          ephemeral: true,
+        });
+        return event;
+      }
+      // console.log(userMention(interaction.options.getUser('user').id));
+      const {amount, description, user} = {
+        amount: interaction.options.getNumber('amount'),
+        description: interaction.options.getString('description'),
+        user: interaction.options.getUser('user'),
+      };
       event.addTxn(
-          interaction.options.getNumber('amount'),
-          interaction.options.getNumber('description'),
-          interaction.options.getNumber('user'),
+          amount,
+          description,
+          user,
       );
+      await interaction.reply({
+        content: `Alright, got it. ${userMention(user.id)} paid \$${amount} for ${description}.`,
+      });
       return event;
     }
 
