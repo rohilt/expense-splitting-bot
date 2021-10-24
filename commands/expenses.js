@@ -44,11 +44,9 @@ module.exports = {
     if (!interaction.isCommand() || interaction.commandName !== 'expenses') return;
     const embed = {
       color: 0xff9a26,
-      title: eventName,
-      url: 'https://discord.js.org',
       description: 'Recorded Expenses for Trip',
       thumbnail: {
-        url: 'https://i.imgur.com/AfFp7pu.png',
+        url: 'https://i.ibb.co/pwCNnfB/money-transfer-icon-40389-1.png',
       },
       timestamp: new Date(),
       footer: {
@@ -78,8 +76,11 @@ module.exports = {
       }
       const eventName = interaction.options.getString('event');
       await interaction.reply({
-        content: `New Trip Created : ${eventName}\n* React to this message if you are part of this event. *`,
-        embeds: [embed],
+        content: `New Trip Created : ${eventName}\n*React to this message if you are part of this event*`,
+        embeds: [{
+          ...embed,
+          title: eventName,
+        }],
       });
       const msg = await interaction.fetchReply();
       await msg.pin();
