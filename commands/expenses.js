@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 const {SlashCommandBuilder, userMention} = require('@discordjs/builders');
-// const {MessageEmbed} = require('discord.js');
 const Event = require('../event');
 
 module.exports = {
@@ -43,6 +42,19 @@ module.exports = {
   // - delete [id]
   async execute(interaction, event) {
     if (!interaction.isCommand() || interaction.commandName !== 'expenses') return;
+    const embed = {
+      color: 0xff9a26,
+      title: eventName,
+      url: 'https://discord.js.org',
+      description: 'Recorded Expenses for Trip',
+      thumbnail: {
+        url: 'https://i.imgur.com/AfFp7pu.png',
+      },
+      timestamp: new Date(),
+      footer: {
+        text: 'React with :thumbsup: to be part of the Trip',
+      },
+    };
     if (interaction.options.getSubcommand() === 'status') {
       if (event) {
         await interaction.reply({
@@ -65,26 +77,14 @@ module.exports = {
         return event;
       }
       const eventName = interaction.options.getString('event');
-      const startEmbed = {
-        color: 0xff9a26,
-        title: eventName,
-        url: 'https://discord.js.org',
-        description: 'Some description here',
-        thumbnail: {
-          url: 'https://i.imgur.com/AfFp7pu.png',
-        },
-        timestamp: new Date(),
-        footer: {
-          text: 'React with :thumbsup: to be part of the Trip',
-        },
-      };
       await interaction.reply({
         content: `New Trip Created : ${eventName}\n* React to this message if you are part of this event. *`,
-        embeds: [startEmbed],
+        embeds: [embed],
       });
-      const msgId = (await interaction.fetchReply()).id;
+      const msg = await interaction.fetchReply();
+      await msg.pin();
       // console.log(msgId);
-      return new Event(eventName, msgId);
+      return new Event(eventName, msg);
     } else if (interaction.options.getSubcommand() === 'report') {
       return event;
     } else if (interaction.options.getSubcommand() === 'end') {
