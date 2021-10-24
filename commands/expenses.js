@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 const {SlashCommandBuilder, userMention} = require('@discordjs/builders');
-const {MessageEmbed} = require('discord.js');
+// const {MessageEmbed} = require('discord.js');
 const Event = require('../event');
 
 module.exports = {
@@ -65,23 +65,21 @@ module.exports = {
         return event;
       }
       const eventName = interaction.options.getString('event');
-      const startEmbed = new MessageEmbed()
-          .setColor('#0099ff')
-          .setTitle('Some title')
-          .setURL('https://discord.js.org/')
-          .setAuthor('Some name', 'https://i.imgur.com/AfFp7pu.png', 'https://discord.js.org')
-          .setDescription('Some description here')
-          .setThumbnail('https://i.imgur.com/AfFp7pu.png')
-          .addFields(
-              {name: 'Inline title', value: 'Some value \nhere', inline: true},
-              {name: 'Inline title', value: 'Some value \nhere', inline: true},
-              {name: 'Inline title', value: 'Some value \nhere', inline: true},
-          )
-          .setImage('https://i.imgur.com/AfFp7pu.png')
-          .setTimestamp()
-          .setFooter('Some footer text here', 'https://i.imgur.com/AfFp7pu.png');
+      const startEmbed = {
+        color: 0xff9a26,
+        title: eventName,
+        url: 'https://discord.js.org',
+        description: 'Some description here',
+        thumbnail: {
+          url: 'https://i.imgur.com/AfFp7pu.png',
+        },
+        timestamp: new Date(),
+        footer: {
+          text: 'React with :thumbsup: to be part of the Trip',
+        },
+      };
       await interaction.reply({
-        content: `Starting the event ${eventName} now! React to this message if you are part of this event.`,
+        content: `New Trip Created : ${eventName}\n* React to this message if you are part of this event. *`,
         embeds: [startEmbed],
       });
       const msgId = (await interaction.fetchReply()).id;
