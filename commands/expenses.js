@@ -1,11 +1,47 @@
+/* eslint-disable max-len */
 const {SlashCommandBuilder} = require('@discordjs/builders');
 const {MessageEmbed} = require('discord.js');
+const Event = require('../event');
 
 module.exports = {
-  data: new SlashCommandBuilder()
-      .setName('expenses')
-      .setDescription('Give out Trip Expense Options'),
-  async execute(interaction) {
+  data:
+    new SlashCommandBuilder()
+        .setName('expenses')
+        .setDescription('Manage group expenses efficiently')
+        .addSubcommand((subcommand) => subcommand
+            .setName('status')
+            .setDescription('Get the current status'))
+        .addSubcommand((subcommand) => subcommand
+            .setName('start')
+            .setDescription('Start a new event')
+            .addStringOption((option) => option
+                .setName('event')
+                .setDescription('The name of the event')
+                .setRequired(true)))
+        .addSubcommand((subcommand) => subcommand
+            .setName('report')
+            .setDescription('Get current transactions recorded'))
+        .addSubcommand((subcommand) => subcommand
+            .setName('end')
+            .setDescription('End the current event'))
+        .addSubcommand((subcommand) => subcommand
+            .setName('record')
+            .setDescription('Record a new transaction')
+            .addUserOption((option) => option
+                .setName('user')
+                .setDescription('The user who paid for this transaction')
+                .setRequired(true))
+            .addStringOption((option) => option
+                .setName('description')
+                .setDescription('The description of the transaction')
+                .setRequired(true))
+            .addNumberOption((option) => option
+                .setName('amount')
+                .setDescription('The amount in this transaction')
+                .setRequired(true))),
+  // - modify [id] [who] [description] [amount]
+  // - delete [id]
+  async execute(interaction, event) {
     const exampleEmbed = new MessageEmbed()
         .setColor('#0099ff')
         .setTitle('Some title')
@@ -22,10 +58,48 @@ module.exports = {
         .setTimestamp()
         .setFooter('Some footer text here', 'https://i.imgur.com/AfFp7pu.png');
 
-    interaction.channel.send({embeds: [exampleEmbed]});
-    interaction.reply(
-        // eslint-disable-next-line max-len
-        'Okay, Here are the current transactions I\'ve kept track of for this trip',
-    );
+    if (!interaction.isCommand() || interaction.commandName !== 'expenses') return;
+    if (interaction.options.getSubcommand() === 'status') {
+      if (event) {
+        await interaction.reply({
+          content: `There is an ongoing event ${event.name}, with ${event.txns.length} transactions`,
+          ephemeral: true,
+        });
+      } else {
+        await interaction.reply({
+          content: 'There is currently no ongoing event. Use the command \`/expenses start [name]\` to start an event.',
+          ephemeral: true,
+        });
+      }
+      return event;
+    } else if (interaction.options.getSubcommand() === 'start') {
+      if (event) {
+        interaction.reply({
+          content: `It looks like the event ${event.name} has already started.`,
+          ephemeral: true,
+        });
+        return event;
+      }
+      const eventName = interaction.options.getString('event');
+      await interaction.reply({
+        content: `Starting the event ${eventName} now! React to this message if you are part of this event.`,
+        embeds: [exampleEmbed],
+      });
+      const msgId = (await interaction.fetchReply()).id;
+      console.log(msgId);
+      return new Event(eventName, msgId);
+    } else if (interaction.options.getSubcommand() === 'report') {
+      return event;
+    } else if (interaction.options.getSubcommand() === 'end') {
+      return event;
+    } else if (interaction.options.getSubcommand() === 'record') {
+      return event;
+    }
+
+    // interaction.channel.send({embeds: [exampleEmbed]});
+    // interaction.reply(
+    // eslint-disable-next-line max-len
+    // 'Okay, Here are the current transactions I\'ve kept track of for this trip',
+    // );
   },
 };

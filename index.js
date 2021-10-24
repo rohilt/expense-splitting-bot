@@ -6,6 +6,7 @@ require('dotenv').config();
 
 // Create a new client instance
 const client = new Client({intents: [Intents.FLAGS.GUILDS]});
+let currentEvent = null;
 
 client.commands = new Collection();
 
@@ -31,7 +32,7 @@ client.on('interactionCreate', async (interaction) => {
   if (!command) return;
 
   try {
-    await command.execute(interaction);
+    currentEvent = await command.execute(interaction, currentEvent);
   } catch (error) {
     console.error(error);
     await interaction.reply({content: 'There was an error while executing this command!', ephemeral: true});
